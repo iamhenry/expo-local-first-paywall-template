@@ -2,22 +2,24 @@
 
 ## Status
 
-- Status: implementation-ready after product identifiers and dashboard configuration are supplied
+- Status: implementation-ready; the source must be fully wired before future-app configuration
 - Target: this Expo 54 application
 - Scope: vendor the existing onboarding package source into the app, preserve its current experience, and add an embedded RevenueCat dashboard paywall
-- Reuse model: future apps copy `components/onboarding` and customize it locally
+- Reuse model: future apps copy the wired onboarding source and make only documented app-specific configuration changes
 - Distribution: app-local source only; no npm publication
 - Source baseline: `react-native-onboarding-flow@1.5.2`, upstream commit `e5bdfb963c4b4e33f5bb5ac7898e36fd9c627dd9`
 - RevenueCat baseline: `react-native-purchases@10.4.3` and `react-native-purchases-ui@10.4.3`
 - Research date: 2026-07-16
 - Complexity: medium
-- Estimate: 1-2 focused engineering days, excluding RevenueCat dashboard, store, and sandbox setup
+- Estimate: 1-2 focused engineering days, excluding only RevenueCat dashboard, store, and sandbox setup
 
 ## Goal
 
-Keep this app's current onboarding visuals, persistence, and placement unchanged while replacing the installed onboarding package with equivalent app-local source and adding an opt-in RevenueCat dashboard paywall after the final `Get Started` action.
+Keep this app's current onboarding visuals, persistence, and placement unchanged while replacing the installed onboarding package with equivalent app-local source and adding a fully wired RevenueCat dashboard paywall after the final `Get Started` action.
 
-The result should be practical starter source, not a general onboarding, subscription, or workflow framework.
+The result should be copy-ready and plug-and-play: future Expo or React Native apps should only need to install the matching native packages, configure public platform keys, configure RevenueCat Dashboard products, and provide their slides, entitlement, placement, completion persistence, and navigation boundary. They should not need to rebuild the paywall state machine, event mapping, dismissal behavior, retry handling, or entitlement checks.
+
+This is still starter source, not a general onboarding, subscription, or workflow framework. Reuse means copying working source and making small local edits, not publishing or configuring a second library.
 
 ## Expected User Flow
 
@@ -57,13 +59,53 @@ import {
 />
 ```
 
-The consuming app configures RevenueCat separately with its public platform SDK key:
+The consuming app configures RevenueCat separately with its public platform SDK key. The delivered source includes this startup adapter and the app integration; future apps replace only the key source and app-specific identifiers:
 
 ```ts
 Purchases.configure({ apiKey: PUBLIC_REVENUECAT_PLATFORM_SDK_KEY });
 ```
 
 `Purchases.configure()` is synchronous in RevenueCat React Native SDK 10.4.3. Do not await it. Never place secret RevenueCat keys, REST API keys, or server credentials in app source or `EXPO_PUBLIC_*` variables.
+
+## Plug-and-Play Contract
+
+The implementation is complete only when a future app can copy the following wired source without reimplementing subscription behavior:
+
+```text
+components/onboarding/
+  -> OnboardingFlow
+  -> OnboardingModal
+  -> OnboardingSlide
+  -> RevenueCatPaywall
+  -> typed paywall injection and dismissal
+  -> loading, retry, back, and terminal callback safety
+
+config/revenuecat.ts
+  -> platform key selection
+  -> idempotent native SDK configuration
+
+components/OnboardingGate.tsx
+  -> slide input
+  -> paywall identifiers
+  -> completion persistence boundary
+  -> native-only paywall opt-in
+```
+
+Future apps must not need to add purchase buttons, call `purchasePackage`, call `restorePurchases`, inspect CustomerInfo, resolve Offerings, or implement paywall dismissal. Those behaviors are already part of the copied source.
+
+### Future-App Configuration Checklist
+
+1. Copy `components/onboarding`, the wired `components/OnboardingGate.tsx` integration, and the small `config/revenuecat.ts` startup adapter.
+2. Install the exact matching `react-native-purchases` and `react-native-purchases-ui` versions.
+3. Add public iOS and Android SDK keys through the app's environment/configuration system.
+4. Call the provided `configureRevenueCat()` adapter once from the root startup path.
+5. Provide the app's slides and existing completion persistence callback.
+6. Set the RevenueCat entitlement identifier.
+7. Set a placement identifier, or omit it to use the current Offering.
+8. Configure products, entitlement, Offering, published dashboard paywall, placement, and store accounts in RevenueCat.
+9. Create a native development build after adding the native packages.
+
+Everything else is delivered by the copied source and should not require app-specific implementation.
 
 ## Acceptance Criteria
 
@@ -75,6 +117,7 @@ Purchases.configure({ apiKey: PUBLIC_REVENUECAT_PLATFORM_SDK_KEY });
 - Slides, media, animations, modal layout, progress indicators, buttons, labels, and theme behavior remain unchanged.
 - The modal remains mounted from the same location in `app/_layout.tsx`.
 - `OnboardingGate` continues to own MMKV completion persistence through the existing `onboarding_completed` key.
+- The template includes a complete `config/revenuecat.ts` startup adapter and a complete `OnboardingGate` integration; future apps change configuration values and app boundaries, not RevenueCat flow logic.
 - With no paywall configured, the existing final-slide completion path behaves exactly as it does today.
 - Empty slides render nothing.
 - Existing image-only use remains valid without `expo-av` installed.
@@ -104,12 +147,14 @@ Purchases.configure({ apiKey: PUBLIC_REVENUECAT_PLATFORM_SDK_KEY });
 ### App Integration
 
 - RevenueCat configuration occurs before the user can reach the paywall.
+- The configuration adapter is idempotent and safe to call from a root effect or equivalent startup boundary.
 - iOS and Android use their own public RevenueCat platform SDK keys.
 - Missing or placeholder public keys leave RevenueCat unconfigured; the paywall then reaches its safe preparation failure state rather than completing onboarding.
 - Web does not configure the native RevenueCat SDK and retains the current direct onboarding completion behavior.
 - `OnboardingGate` continues to persist completion and hide onboarding only after `OnboardingFlow` calls its existing `onComplete` handler.
 - No subscription state, CustomerInfo, Offering, receipt, or transaction data is stored in MMKV.
 - No router, navigation, account, analytics, or subscription-store abstraction is added.
+- The reusable source exposes the callbacks needed for a consuming app's existing completion and dismissal boundary; it does not require a new router or storage system.
 
 ### Privacy and Logging
 
@@ -119,8 +164,6 @@ Purchases.configure({ apiKey: PUBLIC_REVENUECAT_PLATFORM_SDK_KEY });
 
 ### Verification
 
-- Vendored parity tests pass before RevenueCat behavior is added.
-- Focused tests cover paywall entry, completion, dismissal, reopening, preparation, and exact-entitlement behavior.
 - TypeScript strict checking passes.
 - iOS and web Expo exports resolve the vendored source and RevenueCat imports.
 - Existing app startup and MMKV onboarding persistence continue to work.
@@ -165,16 +208,16 @@ What is missing:
 - Exact-entitlement verification.
 - Placement/current Offering preparation.
 - Safe loading and preparation failure states.
-- Jest test infrastructure and focused onboarding/paywall tests.
 - App-specific RevenueCat setup documentation.
+
+The implementation must close all of these gaps before this specification is considered complete. A future app should not receive a partially wired component that still requires subscription logic to be written.
 
 Repository constraints that replace assumptions from the library-oriented draft:
 
 - There is no root `src` package tree.
 - There is no `example` application.
-- There are currently no `test`, `typecheck`, or native `build` scripts.
+- There are currently no `typecheck` or native `build` scripts.
 - The repository uses Bun in its README and existing scripts and contains `bun.lockb`.
-- `package-lock.json` is stale and does not include the currently declared onboarding dependency.
 
 ## Source Baseline and Vendoring Rule
 
@@ -189,11 +232,6 @@ src/components/OnboardingFlow.tsx
 src/components/OnboardingModal.tsx
 src/components/OnboardingSlide.tsx
 src/components/index.ts
-src/__tests__/OnboardingFlow.test.tsx
-src/__tests__/OnboardingSlide.test.tsx
-src/__tests__/OnboardingSlide.noexpoav.test.tsx
-src/__tests__/setup.ts
-src/__tests__/__mocks__/react-native.js
 ```
 
 Map them beneath `components/onboarding/src` with the same relative structure. Add `components/onboarding/index.ts` as the app-local entry point and `components/onboarding/UPSTREAM.md` with:
@@ -236,6 +274,7 @@ components/onboarding
 - Embedded RevenueCat paywall preparation and event mapping.
 - Loading and one safe preparation failure state.
 - Terminal callback idempotency.
+- A complete RevenueCat integration that is ready to render when the consuming app supplies valid configuration.
 
 ### OnboardingGate Owns
 
@@ -244,6 +283,7 @@ components/onboarding
 - RevenueCat entitlement and placement identifiers used for onboarding.
 - MMKV completion persistence.
 - Hiding onboarding after successful completion.
+- Mapping the copied flow to the consuming app's existing visibility and persistence boundary.
 
 ### Root App Owns
 
@@ -251,6 +291,7 @@ components/onboarding
 - Calling `Purchases.configure()` once during startup.
 - RevenueCat customer login/logout lifecycle if accounts are added later.
 - App navigation and provider composition.
+- Calling the provided startup adapter; it does not own Offering resolution, purchase handling, restore handling, or entitlement interpretation.
 
 ### RevenueCat Dashboard Owns
 
@@ -330,7 +371,7 @@ Rules:
 
 ### RevenueCat Startup
 
-Add one app-owned configuration module that:
+Add one complete, reusable configuration module that the template and future copied apps can call without reimplementing RevenueCat setup:
 
 1. Selects the iOS or Android public SDK key from `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` and `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`.
 2. Rejects missing or placeholder values without logging the value.
@@ -339,7 +380,7 @@ Add one app-owned configuration module that:
 5. Does not fetch CustomerInfo or Offerings during root startup.
 6. Does not log customer or subscription data.
 
-Call this configuration from `app/_layout.tsx` before `OnboardingGate` can reach the paywall. Configuration must remain outside `RevenueCatPaywall`.
+Call this provided configuration adapter from `app/_layout.tsx` before `OnboardingGate` can reach the paywall. Configuration must remain outside `RevenueCatPaywall`. The adapter must be safe to call more than once, while the app should call it once during normal startup.
 
 Web is not a real-purchase target for this implementation. `OnboardingGate` must leave `showPaywall` disabled on web so the existing direct completion path remains available. The web app must continue to compile; web purchases require separate RevenueCat Billing setup and are out of scope.
 
@@ -461,14 +502,13 @@ This contract relies on RevenueCat's documented ordering that purchase completio
 - Vendoring the existing package source into `components/onboarding`.
 - Switching `OnboardingGate` from the npm package to the local source.
 - Removing the npm onboarding dependency after parity verification.
-- App-owned RevenueCat public-key configuration.
+- Complete reusable RevenueCat public-key configuration adapter.
 - New embedded `RevenueCatPaywall` component.
 - Minimal `onDismiss` wiring in the vendored flow.
 - Correct paywall element typing.
 - Existing-access and exact-entitlement checks.
 - Placement or current Offering preparation.
 - One loading state and one safe preparation failure state.
-- Focused Jest infrastructure and tests.
 - Package and Bun lockfile updates.
 - Concise README setup documentation.
 
@@ -516,32 +556,19 @@ This contract relies on RevenueCat's documented ordering that purchase completio
 | `components/onboarding/src/components/OnboardingModal.tsx` | Behaviorally unchanged vendored modal and paywall container |
 | `components/onboarding/src/components/OnboardingSlide.tsx` | Behaviorally unchanged vendored media renderer |
 | `components/onboarding/src/components/RevenueCatPaywall.tsx` | RevenueCat preparation, rendering, entitlement checks, and event mapping |
-| `components/onboarding/src/__tests__/OnboardingFlow.test.tsx` | Vendored regressions plus paywall entry/dismissal coverage |
-| `components/onboarding/src/__tests__/OnboardingSlide.test.tsx` | Vendored slide regressions |
-| `components/onboarding/src/__tests__/OnboardingSlide.noexpoav.test.tsx` | Vendored optional-`expo-av` regression |
-| `components/onboarding/src/__tests__/RevenueCatPaywall.test.tsx` | Focused RevenueCat behavior tests |
-| `components/onboarding/src/__tests__/setup.ts` | Jest setup copied and adapted to the app root |
-| `components/onboarding/src/__tests__/__mocks__/react-native.js` | Existing lightweight React Native test mock if still required by the chosen preset |
-| `config/revenuecat.ts` | App-owned, idempotent platform public-key configuration |
-| `jest.config.js` | Expo-compatible Jest configuration scoped to app tests |
+| `config/revenuecat.ts` | Complete reusable, idempotent platform public-key configuration adapter |
 
 ### Modify
 
 | File | Change |
 | --- | --- |
-| `components/OnboardingGate.tsx` | Import local onboarding source and opt into `RevenueCatPaywall` on iOS/Android only; preserve slides and MMKV completion |
+| `components/OnboardingGate.tsx` | Complete wired app integration: edit slides, completion persistence, entitlement, placement, and native-only opt-in without adding subscription logic |
 | `app/_layout.tsx` | Configure RevenueCat once without changing provider, Stack, or onboarding placement |
-| `package.json` | Remove `react-native-onboarding-flow`; add exact RevenueCat packages, Expo-compatible Jest dependencies, `test`, and `typecheck` scripts |
+| `package.json` | Remove `react-native-onboarding-flow`; add exact RevenueCat packages and a `typecheck` script |
 | `bun.lockb` | Lock dependency changes using Bun |
 | `README.md` | Document vendored source, public-key setup, dashboard prerequisites, development builds, and ownership boundaries |
 
-### Remove
-
-| File | Reason |
-| --- | --- |
-| `package-lock.json` | The repository uses Bun and the npm lockfile is already stale; keep one authoritative lockfile |
-
-Do not remove `react-native-onboarding-flow` until the vendored parity tests and TypeScript check pass. The final change set must not retain both implementations.
+Do not remove `react-native-onboarding-flow` until the local import, TypeScript check, Expo export, and manual onboarding parity check pass. The final implementation must not retain both runtime implementations.
 
 ## Dependency Plan
 
@@ -556,21 +583,10 @@ react-native-purchases-ui@10.4.3
 
 Both versions must remain exact because `react-native-purchases-ui@10.4.3` declares an exact peer dependency on `react-native-purchases@10.4.3`.
 
-Test dependencies should be Expo 54 and React 19.1 compatible and selected through Expo where applicable:
-
-```text
-jest
-jest-expo
-@types/jest
-react-test-renderer@19.1.0
-@types/react-test-renderer
-```
-
 Required scripts:
 
 ```json
 {
-  "test": "jest",
   "typecheck": "tsc --noEmit"
 }
 ```
@@ -581,12 +597,11 @@ Do not add `expo-av`; the current app uses image-only slides and the vendored so
 
 ### 1. Vendor and Prove Parity
 
-1. Copy upstream 1.5.2 production source and existing tests into `components/onboarding/src`.
+1. Copy upstream 1.5.2 production source into `components/onboarding/src`.
 2. Add the local barrel and provenance note.
-3. Add Expo-compatible Jest tooling.
-4. Switch `OnboardingGate` to the local import without enabling RevenueCat.
-5. Run copied focused tests, typecheck, and an iOS Expo export.
-6. Confirm the existing two-slide onboarding and MMKV completion behavior manually.
+3. Switch `OnboardingGate` to the local import without enabling RevenueCat.
+4. Run typecheck and an iOS Expo export.
+5. Confirm the existing two-slide onboarding and MMKV completion behavior manually.
 
 Acceptance for this checkpoint:
 
@@ -601,7 +616,6 @@ Acceptance for this checkpoint:
 3. Add `handlePaywallDismiss` to `OnboardingFlow`.
 4. Inject `onComplete` and `onDismiss`.
 5. Keep the current slide index on dismissal.
-6. Extend flow tests for entry, completion, dismissal, and reopening.
 
 ### 3. Add RevenueCatPaywall
 
@@ -619,90 +633,33 @@ Acceptance for this checkpoint:
 
 ### 4. Configure the App
 
-1. Add app-owned platform-key configuration.
+1. Add the complete reusable platform-key configuration adapter.
 2. Call it once during native root startup and skip configuration on web.
-3. Pass app-specific entitlement and optional placement identifiers from `OnboardingGate`.
+3. Pass app-specific entitlement and optional placement identifiers from `OnboardingGate`; do not add purchase or Offering logic there.
 4. Enable `showPaywall` only on iOS and Android.
 5. Keep `handleComplete` as the only persistence path.
 6. Add exact RevenueCat package versions with Bun.
-7. Remove the external onboarding package and stale npm lockfile after parity passes.
+7. Remove the external onboarding package dependency after parity passes.
 
 ### 5. Document and Verify
 
 1. Add concise setup instructions to this app's README.
-2. Run focused and full automated verification.
-3. Perform a native development-build smoke test with test dashboard configuration.
+2. Run TypeScript and Expo export verification.
+3. Perform native development-build verification with sandbox dashboard configuration.
 4. Perform an independent read-only review for scope, privacy, and callback safety.
-
-## Focused Tests
-
-### OnboardingFlow
-
-- Existing visible flow renders unchanged.
-- Empty slides render nothing.
-- Next advances slides.
-- Final button without a paywall completes exactly once.
-- Final button with a paywall enters the paywall without completing.
-- Injected paywall completion completes exactly once.
-- Injected dismissal returns to the final slide without completing.
-- Final slide can reopen a freshly mounted paywall.
-- Existing closeable behavior remains unchanged.
-
-### RevenueCatPaywall
-
-Mock only:
-
-- `Purchases.getCustomerInfo`.
-- `Purchases.getOfferings`.
-- `Purchases.getCurrentOfferingForPlacement`.
-- A lightweight `RevenueCatUI.Paywall` component that captures callback props.
-
-Cover:
-
-- Loading while preparation is pending.
-- Existing configured entitlement completes once without rendering the paywall.
-- An unrelated active entitlement does not complete.
-- Placement Offering renders with `options.offering`.
-- No placement uses `offerings.current`.
-- Placement `null` shows failure and never fetches the current Offering as fallback.
-- Missing current Offering shows failure.
-- CustomerInfo and Offering rejection show failure.
-- Retry can recover from failure.
-- Back dismisses without completing.
-- Purchase with the configured entitlement completes once.
-- Purchase without it does not complete.
-- Restore with the configured entitlement completes once.
-- Restore without it does not complete.
-- Cancellation and purchase/restore errors do not complete.
-- Dismiss without entitlement dismisses once.
-- Dismiss with entitlement completes instead.
-- Dismissal CustomerInfo rejection dismisses without completing.
-- Purchase followed by automatic RevenueCat dismissal does not duplicate callbacks.
-- A dismissal recheck resolving after completion cannot dismiss.
-- Superseded retry results cannot overwrite the newest state.
-- Unmount during preparation or dismissal recheck causes no state updates or callbacks.
-
-### OnboardingGate
-
-- Existing persisted completion hides onboarding.
-- Successful flow completion writes `onboarding_completed` and hides onboarding.
-- Paywall dismissal does not write completion.
-- Web uses the existing no-paywall completion path.
-
-Do not test RevenueCat native internals or reproduce RevenueCat's own UI behavior in Jest.
 
 ## README Requirements
 
 Keep documentation concise and app-specific. Include:
 
-1. The onboarding source is vendored under `components/onboarding` and is intentionally edited locally.
+1. The onboarding source and wired `components/OnboardingGate.tsx` integration are vendored and intentionally edited locally.
 2. RevenueCat package versions must match exactly.
 3. Public iOS and Android SDK key environment variables.
 4. RevenueCat configuration occurs at app startup, outside the paywall component.
 5. Dashboard products, entitlement, Offering, paywall, and optional placement prerequisites.
 6. `OnboardingGate` owns this app's identifiers and MMKV completion.
 7. Purchase, restore, dismissal, and preparation failure behavior.
-8. Expo Go Preview API Mode is useful for mock previews but cannot verify real purchases.
+8. Expo Go Preview API Mode is useful for a quick UI preview but cannot verify real purchases; it is not the source of production behavior.
 9. A new native development build is required after adding native packages.
 10. Paywalls V2 close controls are configured in the RevenueCat dashboard.
 11. Embedded paywalls do not support exit offers.
@@ -710,34 +667,28 @@ Keep documentation concise and app-specific. Include:
 
 Do not add npm publication, code generation, automated upstream sync, generic workflow, or custom-screen guidance.
 
-## Automated Verification
+## Build Verification
 
 Run from the repository root after implementation:
 
 ```bash
-bun run test -- --runInBand components/onboarding/src/__tests__/OnboardingFlow.test.tsx
-bun run test -- --runInBand components/onboarding/src/__tests__/RevenueCatPaywall.test.tsx
-bun run test -- --runInBand
 bun run typecheck
 bunx expo export --platform ios --output-dir /tmp/expo-local-first-paywall-ios-export
 bun run build:web
 ```
 
-The iOS export proves Metro can resolve the vendored source and RevenueCat native imports. Generated iOS export files stay outside the repository. The existing web export must still compile, but it does not prove web purchase support.
+The iOS export proves Metro can resolve the vendored source and RevenueCat native imports. Generated iOS export files stay outside the repository. The existing web export must still compile, but it does not prove web purchase support. The native development build is the proof that the wired production integration works.
 
 Automated pass conditions:
 
 - Every command exits zero.
-- Vendored parity tests remain green.
 - Existing image-only behavior works without `expo-av`.
-- No React `act()` or post-unmount warnings.
-- Callback assertions prove terminal idempotency.
 - No generated export files appear in git status.
 - No secret or production RevenueCat credential is introduced.
 
 ## Native Development-Build Verification
 
-Automated mocks and Expo exports cannot prove RevenueCat native UI or store behavior. In a configured development build:
+Expo exports cannot prove RevenueCat native UI or store behavior. The production source must already be fully wired; in a configured development build:
 
 1. Verify the existing onboarding visuals, modal layout, navigation, labels, progress, and animations.
 2. Verify existing MMKV completion still suppresses onboarding after relaunch.
@@ -748,21 +699,23 @@ Automated mocks and Expo exports cannot prove RevenueCat native UI or store beha
 7. Complete a sandbox purchase and confirm onboarding persists completion exactly once.
 8. Restore an entitled account and confirm completion exactly once.
 9. Restore an account without the configured entitlement and confirm no completion.
-10. Test a placement configured as No Offering and confirm retry/back without fallback or completion.
-11. Test missing/offline Offering preparation and confirm retry/back.
+10. Verify a placement configured as No Offering shows retry/back without fallback or completion.
+11. Verify missing/offline Offering preparation shows retry/back.
 12. Confirm no private RevenueCat data appears in application logs.
 
 Native prerequisites:
 
 - Exact matching RevenueCat packages installed.
 - A native development build created after installation.
-- Public test platform SDK keys configured.
-- Test products connected to the correct stores.
+- Public sandbox platform SDK keys configured.
+- Sandbox products connected to the correct stores.
 - Configured entitlement attached to those products.
 - Published Offering and dashboard paywall.
 - Placement configured when used.
 - Dashboard paywall includes a close or back action when dismissal is expected.
 - Sandbox StoreKit or Google Play tester account.
+
+The only expected future-app code/configuration changes are the checklist items in `Plug-and-Play Contract`. Missing those external prerequisites is a setup problem, not an invitation to implement another paywall integration.
 
 Expo Go may exercise RevenueCat Preview API Mode but is not accepted for these pass conditions.
 
@@ -770,7 +723,7 @@ Expo Go may exercise RevenueCat Preview API Mode but is not accepted for these p
 
 | Risk | Mitigation |
 | --- | --- |
-| Vendored source changes onboarding unintentionally | Copy first, run parity tests, then make only dismissal/paywall edits |
+| Vendored source changes onboarding unintentionally | Copy first, verify the existing onboarding manually, then make only dismissal/paywall edits |
 | App retains two onboarding implementations | Remove the npm package after local parity passes |
 | Restore is treated as access without entitlement | Check the exact configured active entitlement |
 | Purchase completion and automatic dismissal race | Recheck CustomerInfo and use one terminal outcome guard |
@@ -779,8 +732,7 @@ Expo Go may exercise RevenueCat Preview API Mode but is not accepted for these p
 | Native paywall load failures are overpromised | Limit the custom failure guarantee to detectable preparation failures |
 | Expo Go creates false confidence | Require native development-build verification |
 | RevenueCat package versions differ | Pin both packages to exact 10.4.3 |
-| Dual lockfiles drift | Keep Bun as the single package manager and remove stale `package-lock.json` |
-| Sensitive RevenueCat data is logged | Prohibit payload and identifier logging in code, tests, and docs |
+| Sensitive RevenueCat data is logged | Prohibit payload and identifier logging in code and docs |
 | Web behavior regresses | Keep the existing web export as a compile gate; web purchases remain out of scope |
 | Scope grows into a framework | Keep slides, storage, navigation, identifiers, and app policy outside reusable flow internals |
 
@@ -788,15 +740,15 @@ Expo Go may exercise RevenueCat Preview API Mode but is not accepted for these p
 
 - The current onboarding UI and MMKV behavior are unchanged.
 - The app imports onboarding only from vendored local source.
-- The external onboarding package and stale npm lockfile are removed.
+- The copied source contains the complete RevenueCat paywall, startup adapter, entitlement checks, Offering resolution, failure states, and callback safety.
+- The external onboarding package dependency is removed after the local source is active.
 - Embedded RevenueCat dashboard paywall works through the existing full-screen slot.
 - Purchase and restore require the configured active entitlement.
 - Dismissal returns to the final slide when the dashboard provides a dismiss action.
 - Detectable preparation failures never complete onboarding and support retry/back.
 - Terminal callbacks are idempotent.
-- Focused and full Jest tests pass.
 - Strict TypeScript and Expo iOS/web exports pass.
-- Native development-build smoke testing passes.
+- Native development-build verification passes.
 - README explains app-local ownership and RevenueCat setup.
 - No sensitive RevenueCat data is logged or persisted.
 - An independent read-only review finds no scope, correctness, privacy, or maintainability blockers.
