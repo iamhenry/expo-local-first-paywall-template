@@ -14,6 +14,7 @@ import { getItem, setItem } from "@/lib/storage";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 import { Inter_400Regular, Inter_600SemiBold, useFonts } from '@expo-google-fonts/inter';
 import { useEffect } from "react";
+import { OnboardingGate } from "@/components/OnboardingGate";
 
 
 export {
@@ -74,6 +75,7 @@ export default function RootLayout() {
                 headerShadowVisible: false,
               }} name="habits/[id]" />
             </Stack>
+            <OnboardingGate />
           </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </ThemeProvider>
