@@ -1,0 +1,59 @@
+{
+  "_note": "Replace all placeholder values before running Cycle 0. Never commit this file with real keys.",
+  "instagram": {
+    "_note": "All credentials loaded from /home/node/openclaw/.env — INSTAGRAM_ACCESS_TOKEN, INSTAGRAM_BUSINESS_ACCOUNT_ID, FACEBOOK_PAGE_ID. Token auto-refreshes via cron every 50 days.",
+    "apiVersion": "v22.0"
+  },
+  "revenuecat": {
+    "_note": "Credentials loaded from /home/node/openclaw/.env — REVENUECAT_API_KEY, REVENUECAT_PROJECT_ID"
+  },
+  "fal": {
+    "enabled": true,
+    "apiKey": "env:FAL_KEY",
+    "budgetCeilingUSD": 10,
+    "defaultImageModel": "fal-ai/bytedance/seedream/v5/lite/text-to-image",
+    "defaultImageSize": "portrait_9_16"
+  },
+  "brand": {
+    "voice": {
+      "_note": "These fields populate soul.md at runtime. Fill in for your app \u2014 all content persona derives from here.",
+      "role": "A calm, knowledgeable companion for people questioning their relationship with alcohol — not a health authority, not a cheerleader, not a recovery coach. Speaks to the sober curious, not just the sober.",
+      "perspective": "Every claim is a promise to someone vulnerable. Trust is the only real asset — never sensationalize, never promise what the science does not support. Sobriety is a personal experiment, not a moral stance.",
+      "style": "Quiet confidence. Direct without clinical. Warm without performative. Short sentences. Concrete timeframes. No exclamation marks. No shame. No fear tactics. Let the data speak.",
+      "judgment": "When two hooks are equal, pick the one that does not overpromise. When research conflicts, surface the uncertainty. Default to what helps the reader, not what maximizes clicks. Never imply everyone should quit — respect the spectrum.",
+      "boundaries": [
+        "No shame, fear, or manufactured urgency",
+        "No medical outcome claims or implication the app replaces professional support",
+        "No 'you need to quit' framing — always 'here's what you might notice if you try'",
+        "No AA/12-step identity framing unless the audience is explicitly in recovery"
+      ]
+    }
+  },
+  "app": {
+    "name": "Streaks: Zero Proof",
+    "niche": "sobriety, alcohol-free lifestyle, sober curious",
+    "appStoreUrl": "https://apps.apple.com/us/app/streaks-zero-proof/id6746278101",
+    "instagramHandle": "@zeroproofapp",
+    "githubRepo": "https://github.com/soyhenryxyz/zero-proof",
+    "supportNotes": ""
+  },
+  "goal": {
+    "mrrTargetUSD": 10000
+  },
+  "production": {
+    "_note": "Rendering delegated to viral-producer skill. See ../viral-producer/SKILL.md.",
+    "remotionProjectDir": "/home/node/.openclaw/workspace/skills/remotion/test-project",
+    "defaultTier": "P3",
+    "accountPhase": "phase-1",
+    "_phaseNote": "phase-1 (0-1K): T1+T2+P3. phase-2 (1K-10K): T3+T4+P3. phase-3 (10K+): all tiers."
+  },
+  "posting": {
+    "timezone": "America/Los_Angeles",
+    "defaultTimes": [
+      "08:00",
+      "16:30",
+      "19:00"
+    ],
+    "privacyDefault": "DRAFT"
+  }
+}
