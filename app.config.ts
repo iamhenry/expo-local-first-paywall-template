@@ -4,8 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Expo Starter",
   slug: "expostarter",
-  newArchEnabled: true,
-  version: "1.0.0",
+  version: "1.0.1",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "ltstarter",
@@ -20,12 +19,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    newArchEnabled: true,
     supportsTablet: true,
     bundleIdentifier: "com.expostarter.base",
   },
   android: {
-    newArchEnabled: true,
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
@@ -37,7 +34,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     output: "static",
     favicon: "./assets/images/favicon.png",
   },
-  plugins: ["expo-router", "expo-sqlite", "expo-font", "expo-web-browser"],
+  plugins: [
+    "expo-router",
+    "expo-sqlite",
+    "expo-font",
+    "expo-web-browser",
+    ["expo-navigation-bar", { enforceContrast: false }],
+  ],
   experiments: {
     typedRoutes: true,
     baseUrl: "/expo-local-first-template",

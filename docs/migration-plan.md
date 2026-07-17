@@ -346,18 +346,18 @@ Complete this checklist in order. Attach command output, build links, screenshot
 
 ### 1. Baseline
 
-- [ ] Create a dedicated SDK 55 migration branch from a clean SDK 54 revision.
-- [ ] Record the starting commit SHA.
-- [ ] Record `node --version`, `bun --version`, and the resolved top-level dependency tree.
-- [ ] Run and record the SDK 54 Expo Doctor result.
-- [ ] Run and record the SDK 54 typecheck result.
-- [ ] Run and record the SDK 54 web-export result.
-- [ ] Serve the SDK 54 web export under `/expo-local-first-template` and verify the SQLite-backed home screen loads.
-- [ ] Choose and record local native builds or EAS as the iOS/Android build path.
+- [x] Create a dedicated SDK 55 migration branch from a clean SDK 54 revision.
+- [x] Record the starting commit SHA.
+- [x] Record `node --version`, `bun --version`, and the resolved top-level dependency tree.
+- [x] Run and record the SDK 54 Expo Doctor result.
+- [x] Run and record the SDK 54 typecheck result.
+- [x] Run and record the SDK 54 web-export result.
+- [x] Serve the SDK 54 web export under `/expo-local-first-template` and verify the SQLite-backed home screen loads.
+- [x] Choose and record local native builds or EAS as the iOS/Android build path.
 - [ ] If using EAS, configure the EAS project and development/internal-distribution profiles before build verification.
 - [ ] Build and launch the SDK 54 Android development client.
 - [ ] Build and launch the SDK 54 iOS development client.
-- [ ] Record any pre-existing warnings or failures so they are not misclassified as migration regressions.
+- [x] Record any pre-existing warnings or failures so they are not misclassified as migration regressions.
 - [ ] Seed the upgrade-test installation with a selected theme and completed onboarding state.
 - [ ] Seed SQLite with at least one active habit and one archived habit.
 - [ ] Confirm the RevenueCat sandbox/Test Store offering loads before upgrading.
@@ -365,76 +365,76 @@ Complete this checklist in order. Attach command output, build links, screenshot
 
 ### 2. Toolchain and Package Manager
 
-- [ ] Switch the development and build environments to Node.js 22 LTS.
-- [ ] Declare the supported Node.js version in the repository.
-- [ ] Add the chosen Bun version to `package.json#packageManager`.
-- [ ] Confirm Bun is the package manager used by local development and CI.
-- [ ] Remove `package-lock.json` after Bun is confirmed.
-- [ ] Reinstall dependencies using Bun only.
-- [ ] Confirm `bun install --frozen-lockfile` succeeds from a clean install.
-- [ ] Verify the lockfile contains no duplicate React, React Native, Expo module, Reanimated, or Worklets versions.
+- [x] Switch the development and build environments to Node.js 22 LTS.
+- [x] Declare the supported Node.js version in the repository.
+- [x] Add the chosen Bun version to `package.json#packageManager`.
+- [x] Confirm Bun is the package manager used by local development and CI.
+- [x] Remove `package-lock.json` after Bun is confirmed.
+- [x] Reinstall dependencies using Bun only.
+- [x] Confirm `bun install --frozen-lockfile` succeeds from a clean install.
+- [x] Verify the lockfile contains no duplicate React, React Native, Expo module, Reanimated, or Worklets versions.
 
 ### 3. SDK and Dependency Upgrade
 
-- [ ] Install Expo SDK 55 with `bun install expo@^55.0.0`.
-- [ ] Align compatible dependencies with `bunx expo install --fix`.
-- [ ] Confirm Expo resolves to the latest stable SDK 55 patch.
-- [ ] Confirm React resolves to Expo's SDK 55 version.
-- [ ] Confirm React Native resolves to Expo's SDK 55 version.
-- [ ] Confirm all installed Expo modules resolve to compatible `55.x` versions.
-- [ ] Confirm `expo-dev-client` resolves to the Expo SDK 55 package line.
-- [ ] Confirm Reanimated and Worklets resolve to Expo's paired versions.
-- [ ] Confirm Gesture Handler, Screens, Safe Area Context, and SVG match Expo's SDK 55 versions.
-- [ ] Keep FlashList at Expo's supported `2.0.2` unless verified evidence requires otherwise.
-- [ ] Keep MMKV v3 unless a reproducible SDK 55 incompatibility requires otherwise.
-- [ ] Keep RevenueCat core and UI packages on exactly matching versions.
-- [ ] Avoid unrelated dependency upgrades.
-- [ ] Run Expo Doctor and resolve every actionable finding without exclusions or forced resolutions.
+- [x] Install Expo SDK 55 with `bun install expo@^55.0.0`.
+- [x] Align compatible dependencies with `bunx expo install --fix`.
+- [x] Confirm Expo resolves to the latest stable SDK 55 patch.
+- [x] Confirm React resolves to Expo's SDK 55 version.
+- [x] Confirm React Native resolves to Expo's SDK 55 version.
+- [x] Confirm all installed Expo modules resolve to compatible `55.x` versions.
+- [x] Confirm `expo-dev-client` resolves to the Expo SDK 55 package line.
+- [x] Confirm Reanimated and Worklets resolve to Expo's paired versions.
+- [x] Confirm Gesture Handler, Screens, Safe Area Context, and SVG match Expo's SDK 55 versions.
+- [x] Keep FlashList at Expo's supported `2.0.2` unless verified evidence requires otherwise.
+- [x] Keep MMKV v3 unless a reproducible SDK 55 incompatibility requires otherwise.
+- [x] Keep RevenueCat core and UI packages on exactly matching versions.
+- [x] Avoid unrelated dependency upgrades.
+- [x] Run Expo Doctor and resolve every actionable finding without exclusions or forced resolutions.
 
 ### 4. Required Source Changes
 
-- [ ] Remove global `newArchEnabled` from `app.config.ts`.
-- [ ] Remove iOS `newArchEnabled` from `app.config.ts`.
-- [ ] Remove Android `newArchEnabled` from `app.config.ts`.
-- [ ] Remove the explicit `react-native-reanimated/plugin` from `babel.config.js`.
-- [ ] Retain the NativeWind Babel setup.
-- [ ] Retain the inline SQL import transform.
-- [ ] Remove `NavigationBar.setBackgroundColorAsync()` usage.
-- [ ] Replace `NavigationBar.setButtonStyleAsync()` with the supported `NavigationBar.setStyle()` behavior.
-- [ ] Add the `expo-navigation-bar` config plugin with `enforceContrast: false` for `setStyle()` support.
+- [x] Remove global `newArchEnabled` from `app.config.ts`.
+- [x] Remove iOS `newArchEnabled` from `app.config.ts`.
+- [x] Remove Android `newArchEnabled` from `app.config.ts`.
+- [x] Remove the explicit `react-native-reanimated/plugin` from `babel.config.js`.
+- [x] Retain the NativeWind Babel setup.
+- [x] Retain the inline SQL import transform.
+- [x] Remove `NavigationBar.setBackgroundColorAsync()` usage.
+- [x] Replace `NavigationBar.setButtonStyleAsync()` with the supported `NavigationBar.setStyle()` behavior.
+- [x] Add the `expo-navigation-bar` config plugin with `enforceContrast: false` for `setStyle()` support.
 - [ ] Verify Android navigation controls remain legible with gesture and three-button navigation.
-- [ ] Confirm `StatusBar` uses no deprecated background, translucency, or network-activity APIs.
-- [ ] Increment the app version so SDK 55 builds cannot share the SDK 54 `appVersion` runtime.
-- [ ] Confirm the repository has no `eas update` command; if one is added, include `--environment` explicitly.
-- [ ] Leave direct `@react-navigation/native` imports unchanged.
-- [ ] Do not add SDK 56 codemods or compatibility code.
-- [ ] Do not add new experimental flags or packages.
+- [x] Confirm `StatusBar` uses no deprecated background, translucency, or network-activity APIs.
+- [x] Increment the app version so SDK 55 builds cannot share the SDK 54 `appVersion` runtime.
+- [x] Confirm the repository has no `eas update` command; if one is added, include `--environment` explicitly.
+- [x] Leave direct `@react-navigation/native` imports unchanged.
+- [x] Do not add SDK 56 codemods or compatibility code.
+- [x] Do not add new experimental flags or packages.
 
 ### 5. Static Verification
 
-- [ ] Run `bun install --frozen-lockfile` successfully.
-- [ ] Run `bun run expo-check` successfully.
-- [ ] Run `bunx expo-doctor@latest` successfully.
+- [x] Run `bun install --frozen-lockfile` successfully.
+- [x] Run `bun run expo-check` successfully.
+- [x] Run `bunx expo-doctor@latest` successfully.
 - [ ] Run `bun run typecheck` successfully.
-- [ ] Run `bun run build:web` successfully.
-- [ ] Confirm web output includes styles, fonts, icons, WASM, SQL assets, and routes.
-- [ ] Serve the export under `/expo-local-first-template` and confirm `database.sqlite` loads and SQL.js initializes.
-- [ ] Confirm NativeWind styles work on initial load and after a development reload.
-- [ ] Review the final dependency and lockfile diff for unexpected additions.
+- [x] Run `bun run build:web` successfully.
+- [x] Confirm web output includes styles, fonts, icons, WASM, SQL assets, and routes.
+- [x] Serve the export under `/expo-local-first-template` and confirm `database.sqlite` loads and SQL.js initializes.
+- [x] Confirm NativeWind styles work on initial load and after a development reload.
+- [x] Review the final dependency and lockfile diff for unexpected additions.
 
 ### 6. Native Regeneration and Builds
 
-- [ ] Clear Metro and Expo generated caches.
-- [ ] Run a clean prebuild.
-- [ ] Confirm generated native projects contain RevenueCat, MMKV, Reanimated, Worklets, SQLite, and notification modules.
-- [ ] Build a fresh Android development client.
+- [x] Clear Metro and Expo generated caches.
+- [x] Run a clean prebuild.
+- [x] Confirm generated native projects contain RevenueCat, MMKV, Reanimated, Worklets, SQLite, and notification modules.
+- [x] Build a fresh Android development client.
 - [ ] Install and launch the Android development client.
 - [ ] Build a fresh iOS development client with an SDK 55-compatible Xcode image.
 - [ ] Confirm the iOS development build uses Xcode 26 or newer.
 - [ ] If using EAS iOS internal distribution, register test devices and refresh the ad hoc profile before building.
 - [ ] Install and launch the iOS development client.
 - [ ] Confirm neither platform logs missing native module, TurboModule, worklet, or autolinking errors.
-- [ ] Confirm generated `ios/` and `android/` directories remain uncommitted under the CNG workflow.
+- [x] Confirm generated `ios/` and `android/` directories remain uncommitted under the CNG workflow.
 
 ### 7. Persisted Data Regression Test
 
@@ -490,24 +490,38 @@ Complete this checklist in order. Attach command output, build links, screenshot
 
 ### 10. Production-Like Verification
 
-- [ ] Build an Android internal-distribution or release binary.
+- [x] Build an Android internal-distribution or release binary.
 - [ ] Build an iOS internal-distribution or release binary.
 - [ ] Launch both binaries without a development server.
 - [ ] Smoke-test database load, navigation, theme restoration, and paywall presentation in both binaries.
 - [ ] Confirm the release version, runtime version, and update channel are correct before distribution.
-- [ ] Confirm the SDK 55 app version/runtime cannot target distributed SDK 54 binaries.
-- [ ] Confirm no EAS Update is published from the migration branch before runtime isolation and explicit environment selection.
+- [x] Confirm the SDK 55 app version/runtime cannot target distributed SDK 54 binaries.
+- [x] Confirm no EAS Update is published from the migration branch before runtime isolation and explicit environment selection.
 
 ### 11. Review and Completion
 
 - [ ] Confirm every acceptance criterion is satisfied.
-- [ ] Confirm every additional changed file is tied to a reproduced migration requirement.
-- [ ] Confirm no warning, failing check, or regression is silently waived.
+- [x] Confirm every additional changed file is tied to a reproduced migration requirement.
+- [x] Confirm no warning, failing check, or regression is silently waived.
 - [ ] Attach SDK 54 baseline and SDK 55 result evidence to the pull request.
-- [ ] Obtain code review for dependency, configuration, and lockfile changes.
+- [x] Obtain code review for dependency, configuration, and lockfile changes.
 - [ ] Obtain product verification for onboarding and paywall behavior.
 - [ ] Merge only after all required gates pass.
-- [ ] Preserve the verified SDK 54 revision as the rollback point until SDK 55 is released successfully.
+- [x] Preserve the verified SDK 54 revision as the rollback point until SDK 55 is released successfully.
+
+## Execution Evidence
+
+Evidence recorded on 2026-07-16. The migration implementation is code-vetted, but the migration is not release-accepted because all six verification gates have not passed. Material deviations and evidence gaps are tracked in [migration-deviations.md](migration-deviations.md).
+
+| Area | Proven result | Status |
+| --- | --- | --- |
+| SDK 54 comparison | Immutable commit `64dfcb4` reconstructed after migration: frozen install, web export, base-path database load, and home render passed; Expo checks and 19 type errors were recorded | Partial baseline |
+| Toolchain and dependencies | Node 22, Bun 1.3.5, Expo 55.0.28, React 19.2, and React Native 0.83.6 aligned; frozen install, Expo check, and Expo Doctor 19/19 passed | Passed |
+| Static and web | Web assets, routes, styles, fonts, SQL.js WASM, SQLite response, stable home render, cache-clear development start, and NativeWind reload passed; typecheck retains the same 19 SDK 54 errors | Partial |
+| Android native | Clean CNG prebuild and single-ABI x86_64 debug and release compilation passed; binaries were not installed or launched, and the release APK is debug-signed | Compile only |
+| iOS native | Build, Xcode 26, install, and launch evidence require the user's Mac | Pending |
+| Device behavior | Persisted data, RevenueCat, native UI, cold start, deep links, offline behavior, and production-like launches are untested | Pending |
+| Review | Independent quality gate approved the implementation at 92/100; product and device acceptance remain open | Code-vetted only |
 
 ## Official References
 
