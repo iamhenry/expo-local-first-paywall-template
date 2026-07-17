@@ -43,3 +43,11 @@ expo-env.d.ts
 android
 ios
 notes.txt
+
+# AI starter kit
+.idea/
+.vscode/
+.opencode/package-lock.json
+__pycache__/
+build/
+.osgrep/

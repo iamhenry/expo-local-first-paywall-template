@@ -1,7 +1,5 @@
 import {cva, type VariantProps} from "class-variance-authority";
-import {Link} from "expo-router";
-import type {LinkProps} from "expo-router/build/link/Link";
-import type {ExpoRouter} from "expo-router/types/expo-router";
+import {type Href, Link, type LinkProps} from "expo-router";
 import type React from "react";
 import type {ElementType} from "react";
 import {Pressable, type PressableProps, Text, View, type ViewProps} from "react-native";
@@ -46,7 +44,7 @@ type ListItemProps = VariantProps<typeof listItemTextVariants> & {
 	/**
 	 * Convert the default Pressable with a Link component.
 	 */
-	href?: ExpoRouter.Href;
+	href?: Href;
 	className?: string;
 } & (ViewProps | PressableProps | LinkProps);
 
@@ -79,7 +77,7 @@ const ListItem: React.FC<ListItemProps> = ({
 	};
 	const pressable = props?.onPress || href;
 	const Component = (pressable ? Pressable : View) as ElementType<
-		ViewProps | PressableProps | LinkProps
+		ViewProps | PressableProps | Omit<LinkProps, "href">
 	>;
 
 	const body = (

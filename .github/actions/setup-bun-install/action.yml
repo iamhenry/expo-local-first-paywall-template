@@ -11,14 +11,18 @@
 #       - name : 📦 Setup bun + install deps
 #         uses: ./.github/actions/setup-bun
 
-name: 'Setup  Node + PNPM + Install Dependencies'
-description: 'Setup  Node + PNPM + Install Dependencies'
+name: 'Setup Node + Bun + Install Dependencies'
+description: 'Setup Node + Bun + Install Dependencies'
 runs:
   using: 'composite'
   steps:
-    - uses: oven-sh/setup-bun@v1
+    - uses: actions/setup-node@v4
       with:
-        bun-version: latest
+        node-version: 22
+
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: 1.3.5
 
     - name: 📦 Install Project Dependencies
       run: bun install --frozen-lockfile
