@@ -54,7 +54,7 @@ export function OnboardingGate() {
       slides={slides}
       visible={visible}
       onComplete={handleComplete}
-      closeable={false}
+      closeable={true}
       showProgress
       showPaywall={showPaywall}
       paywallComponent={
