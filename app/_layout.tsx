@@ -43,16 +43,17 @@ export default function RootLayout() {
   useEffect(() => {
     configureRevenueCat();
 
-    const theme = getItem("theme");
+    const theme = getItem<"light" | "dark" | "system">("theme");
     if (!theme) {
       setAndroidNavigationBar(colorScheme);
       setItem("theme", colorScheme);
       return;
     }
-    const colorTheme = theme === "dark" ? "dark" : "light";
-    setAndroidNavigationBar(colorTheme);
-    if (colorTheme !== colorScheme) {
-      setColorScheme(colorTheme);
+    setColorScheme(theme);
+    if (theme !== "system") {
+      setAndroidNavigationBar(theme);
+    } else {
+      setAndroidNavigationBar(colorScheme);
     }
   }, []);
 

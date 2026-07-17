@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "ltstarter",
-  userInterfaceStyle: "dark",
+  userInterfaceStyle: "automatic",
   runtimeVersion: {
     policy: "appVersion",
   },
