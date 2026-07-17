@@ -11,6 +11,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build:web": "expo export --platform web",
+    "typecheck": "tsc --noEmit",
     "format": "biome check --no-errors-on-unmatched --apply .",
     "db:generate": "bun drizzle-kit generate",
     "expo-check": "bun expo install --check"
@@ -65,7 +66,8 @@
     "react-native": "0.81.4",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-mmkv": "^3.3.3",
-    "react-native-onboarding-flow": "^1.5.2",
+    "react-native-purchases": "10.4.3",
+    "react-native-purchases-ui": "10.4.3",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",

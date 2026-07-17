@@ -57,6 +57,36 @@ bun run dev:android
 
 This will open the app in the iOS simulator or Android emulator.
 
+### RevenueCat onboarding setup
+
+This app vendors the onboarding source and the wired `components/OnboardingGate.tsx` integration intentionally. Edit them locally for this app; do not treat them as generated or auto-synced upstream code.
+
+Use exact RevenueCat package versions:
+
+- `react-native-purchases@10.4.3`
+- `react-native-purchases-ui@10.4.3`
+
+Configure public SDK keys through the app environment:
+
+```shell
+EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=<public-ios-sdk-key>
+EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=<public-android-sdk-key>
+```
+
+RevenueCat is configured once at app startup through `configureRevenueCat()`, outside the paywall component. `OnboardingGate` owns this app's RevenueCat identifiers and MMKV onboarding-completion persistence.
+
+Before testing purchases, configure RevenueCat dashboard products, entitlement, Offering, published Paywalls V2 paywall, optional placement, and store sandbox accounts. Paywalls V2 close controls are dashboard-owned. Embedded paywalls do not support exit offers.
+
+Behavior to expect:
+
+- Purchase success or restore with the configured entitlement completes onboarding once.
+- Purchase cancellation, dismissal, missing entitlement, or preparation failure does not complete onboarding.
+- Preparation failures show retry/back behavior; they should not fall back to a custom paywall.
+
+Expo Go Preview API Mode is useful for a quick UI preview only. It cannot verify real purchases and is not production behavior. Create a new native development build after adding the native RevenueCat packages.
+
+Security: never log RevenueCat customer, receipt, transaction, or other private purchase payloads. Public SDK key placeholders are required setup, not deviations.
+
 ### Contributions
 
 Everyone is welcome to contribute to this project. Feel free to open an issue if you have question or found a bug. Totally open to any suggestions and improvements.

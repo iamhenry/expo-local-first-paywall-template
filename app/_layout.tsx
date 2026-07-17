@@ -15,6 +15,7 @@ import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 import { Inter_400Regular, Inter_600SemiBold, useFonts } from '@expo-google-fonts/inter';
 import { useEffect } from "react";
 import { OnboardingGate } from "@/components/OnboardingGate";
+import { configureRevenueCat } from "@/config/revenuecat";
 
 
 export {
@@ -40,6 +41,8 @@ export default function RootLayout() {
   useFrameworkReady();
 
   useEffect(() => {
+    configureRevenueCat();
+
     const theme = getItem("theme");
     if (!theme) {
       setAndroidNavigationBar(colorScheme);

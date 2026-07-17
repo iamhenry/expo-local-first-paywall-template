@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { OnboardingFlow, type OnboardingSlideData } from "react-native-onboarding-flow";
+import { Platform } from "react-native";
+import {
+  OnboardingFlow,
+  RevenueCatPaywall,
+  type OnboardingSlideData,
+} from "@/components/onboarding";
 import { getItem, setItem } from "@/lib/storage";
 
 const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
+const showPaywall = Platform.OS === "ios" || Platform.OS === "android";
 
 const slides: OnboardingSlideData[] = [
   {
@@ -50,6 +56,13 @@ export function OnboardingGate() {
       onComplete={handleComplete}
       closeable={false}
       showProgress
+      showPaywall={showPaywall}
+      paywallComponent={
+        <RevenueCatPaywall
+          entitlementIdentifier="pro"
+          placementIdentifier="onboarding_end"
+        />
+      }
     />
   );
 }
