@@ -43,12 +43,18 @@ Run the following command on your local environment:
 bunx create-expo-app --template https://github.com/expo-starter/expo-local-first-template
 ```
 
-Then, you can run locally in development mode with live reload:
+Then, build the native development client and run it locally with live reload:
 
 ```shell
-bun run dev:ios
+bun run ios
 # Or
 bun run dev:android
+```
+
+If CocoaPods fails with `Unicode Normalization not appropriate for ASCII-8BIT`, set a UTF-8 locale and run it again:
+
+```shell
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 ```
 
 <p align="center">
